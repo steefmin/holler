@@ -19,9 +19,14 @@ defmodule Holler.Services.Gotify do
 
   ## Token requirements
 
+  Either a legacy token:
+
   - Exactly 15 characters
   - Must start with `A`
   - Only alphanumeric characters and `. - _`
+
+  Or a Gotify 3 application token: `gtfya.` followed by 43 base64url
+  characters (`A-Z a-z 0-9 - _`).
   """
 
   @behaviour Holler.Service
@@ -30,6 +35,9 @@ defmodule Holler.Services.Gotify do
   @default_priority 0
   @token_length 15
   @token_regex ~r/^A[a-zA-Z0-9._-]{14}$/
+  @app_token_prefix "gtfya."
+  @app_token_key_length 43
+  @app_token_key_regex ~r/^[a-zA-Z0-9_-]{43}$/
 
   @impl true
   def initialize(%URI{} = uri) do
@@ -120,6 +128,16 @@ defmodule Holler.Services.Gotify do
         {:ok, {sub_path, token}}
     end
   end
+
+  defp validate_token(@app_token_prefix <> key) when byte_size(key) == @app_token_key_length do
+    if Regex.match?(@app_token_key_regex, key) do
+      :ok
+    else
+      {:error, {:invalid_token, :invalid_characters}}
+    end
+  end
+
+  defp validate_token(@app_token_prefix <> _key), do: {:error, {:invalid_token, :wrong_length}}
 
   defp validate_token(token) when byte_size(token) == @token_length do
     if Regex.match?(@token_regex, token) do

@@ -68,5 +68,22 @@ defmodule Holler.Services.GotifyTest do
       assert {:ok, config} = Gotify.initialize(uri)
       assert config.token == "Aq.to-en_123456"
     end
+
+    test "accepts a Gotify 3 application token" do
+      token = "gtfya." <> String.duplicate("aB3-_", 8) <> "xyz"
+      uri = URI.parse("gotify://example.com/" <> token)
+      assert {:ok, config} = Gotify.initialize(uri)
+      assert config.token == token
+    end
+
+    test "returns error for a Gotify 3 application token with wrong length" do
+      uri = URI.parse("gotify://example.com/gtfya.tooshort")
+      assert {:error, {:invalid_token, :wrong_length}} = Gotify.initialize(uri)
+    end
+
+    test "returns error for a Gotify 3 application token with invalid characters" do
+      uri = URI.parse("gotify://example.com/gtfya." <> String.duplicate("a", 42) <> ".")
+      assert {:error, {:invalid_token, :invalid_characters}} = Gotify.initialize(uri)
+    end
   end
 end
