@@ -94,13 +94,15 @@ defmodule Holler.Services.Generic do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     title = Map.get(params, :title, config.title)
     config = %{config | title: title}
 
     body = build_body(config, message)
     headers = build_headers(config)
 
-    case Req.request(
+    case Holler.HTTP.request(
            method: String.downcase(config.method) |> String.to_atom(),
            url: config.url,
            body: body,

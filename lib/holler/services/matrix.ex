@@ -58,6 +58,8 @@ defmodule Holler.Services.Matrix do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     rooms_override = Map.get(params, :rooms, nil)
 
     scheme = if config.disable_tls, do: "http", else: "https"
@@ -110,7 +112,7 @@ defmodule Holler.Services.Matrix do
       "password" => password
     }
 
-    case Req.post(url, json: payload) do
+    case Holler.HTTP.post(url, json: payload) do
       {:ok, %{status: 200, body: %{"access_token" => token}}} ->
         {:ok, token}
 
@@ -139,7 +141,7 @@ defmodule Holler.Services.Matrix do
   defp get_joined_rooms(base_url, token) do
     url = "#{base_url}/_matrix/client/r0/joined_rooms"
 
-    case Req.get(url, headers: [{"authorization", "Bearer #{token}"}]) do
+    case Holler.HTTP.get(url, headers: [{"authorization", "Bearer #{token}"}]) do
       {:ok, %{status: 200, body: %{"joined_rooms" => rooms}}} ->
         {:ok, rooms}
 
@@ -175,7 +177,7 @@ defmodule Holler.Services.Matrix do
     encoded = URI.encode(room_alias)
     url = "#{base_url}/_matrix/client/r0/directory/room/#{encoded}"
 
-    case Req.get(url, headers: [{"authorization", "Bearer #{token}"}]) do
+    case Holler.HTTP.get(url, headers: [{"authorization", "Bearer #{token}"}]) do
       {:ok, %{status: 200, body: %{"room_id" => room_id}}} ->
         room_id
 
@@ -197,7 +199,7 @@ defmodule Holler.Services.Matrix do
       "body" => message
     }
 
-    case Req.put(url, json: payload, headers: [{"authorization", "Bearer #{token}"}]) do
+    case Holler.HTTP.put(url, json: payload, headers: [{"authorization", "Bearer #{token}"}]) do
       {:ok, %{status: 200}} ->
         :ok
 

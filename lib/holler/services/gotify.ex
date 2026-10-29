@@ -12,6 +12,11 @@ defmodule Holler.Services.Gotify do
       gotify://example.com:8080/subpath/AqEtoken123456?priority=5&title=Alert
       gotify://example.com/AqEtoken123456?disabletls=yes
 
+  ## Params
+
+  `title` and `priority` override the URL options. `click` is sent as the
+  `client::notification` extras, so a click on the notification opens it.
+
   ## Token requirements
 
   - Exactly 15 characters
@@ -56,13 +61,15 @@ defmodule Holler.Services.Gotify do
 
     url = build_url(config)
 
-    body = %{
-      "message" => message,
-      "title" => title,
-      "priority" => priority
-    }
+    body =
+      %{
+        "message" => message,
+        "title" => title,
+        "priority" => priority
+      }
+      |> put_click(Map.get(params, :click))
 
-    case Req.post(url, json: body, params: [token: config.token]) do
+    case Holler.HTTP.post(url, json: body, params: [token: config.token]) do
       {:ok, %{status: 200}} ->
         :ok
 
@@ -75,6 +82,12 @@ defmodule Holler.Services.Gotify do
   end
 
   # --- Private helpers ---
+
+  defp put_click(body, url) when is_binary(url) and url != "" do
+    Map.put(body, "extras", %{"client::notification" => %{"click" => %{"url" => url}}})
+  end
+
+  defp put_click(body, _url), do: body
 
   defp parse_host(%URI{host: nil}), do: {:error, :missing_host}
   defp parse_host(%URI{host: ""}), do: {:error, :missing_host}

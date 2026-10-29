@@ -48,6 +48,8 @@ defmodule Holler.Services.Discord do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     username = Map.get(params, :username, config.username)
     avatar = Map.get(params, :avatar, config.avatar)
     thread_id = Map.get(params, :thread_id, config.thread_id)
@@ -59,7 +61,7 @@ defmodule Holler.Services.Discord do
       |> maybe_put("username", username)
       |> maybe_put("avatar_url", avatar)
 
-    case Req.post(url, json: payload) do
+    case Holler.HTTP.post(url, json: payload) do
       {:ok, %{status: 204}} ->
         :ok
 

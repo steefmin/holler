@@ -46,6 +46,8 @@ defmodule Holler.Services.Zulip do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     stream = Map.get(params, :stream, config.stream)
     topic = Map.get(params, :topic, Map.get(params, :title, config.topic))
 
@@ -72,7 +74,7 @@ defmodule Holler.Services.Zulip do
 
     _ = msg_type
 
-    case Req.post(url,
+    case Holler.HTTP.post(url,
            form: payload,
            auth: {:basic, "#{config.bot_mail}:#{config.bot_key}"}
          ) do

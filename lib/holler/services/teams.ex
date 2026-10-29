@@ -52,6 +52,8 @@ defmodule Holler.Services.Teams do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     title = Map.get(params, :title, config.title)
     color = Map.get(params, :color, config.color)
 
@@ -59,7 +61,7 @@ defmodule Holler.Services.Teams do
 
     payload = build_payload(message, title, color)
 
-    case Req.post(url, json: payload) do
+    case Holler.HTTP.post(url, json: payload) do
       {:ok, %{status: 200}} ->
         :ok
 

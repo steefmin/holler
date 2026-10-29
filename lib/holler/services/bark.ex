@@ -22,6 +22,8 @@ defmodule Holler.Services.Bark do
   | `copy`     | _(none)_ | Value to copy to clipboard |
   | `category` | _(none)_ | Reserved for future use |
 
+  `title` and `click` in `params` override `title` and `url` per message.
+
   ## Example
 
       bark://:mydevicekey@api.day.app?title=Alert&sound=chime
@@ -65,7 +67,8 @@ defmodule Holler.Services.Bark do
   @impl true
   def send(config, message, params) do
     title = Map.get(params, :title, config.title)
-    config = %{config | title: title}
+    url = Map.get(params, :click, config.url)
+    config = %{config | title: title, url: url}
 
     endpoint = "#{config.scheme}://#{config.host}#{config.path}/#{URI.encode(config.device_key)}"
 
@@ -80,7 +83,7 @@ defmodule Holler.Services.Bark do
       |> maybe_put("category", config.category)
       |> then(fn m -> if config.badge > 0, do: Map.put(m, "badge", config.badge), else: m end)
 
-    case Req.post(endpoint, json: payload) do
+    case Holler.HTTP.post(endpoint, json: payload) do
       {:ok, %{status: status}} when status in 200..299 ->
         :ok
 

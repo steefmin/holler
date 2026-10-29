@@ -68,6 +68,8 @@ defmodule Holler.Services.Mercure do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     topic = Map.get(params, :topic, config.topic)
     private = Map.get(params, :private, config.private)
     id = Map.get(params, :id, config.id)
@@ -83,7 +85,7 @@ defmodule Holler.Services.Mercure do
       |> maybe_field("type", type)
       |> maybe_field("retry", to_string_or_empty(retry))
 
-    case Req.post(url,
+    case Holler.HTTP.post(url,
            form: body,
            headers: [{"authorization", "Bearer #{config.jwt}"}]
          ) do

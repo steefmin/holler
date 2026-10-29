@@ -52,6 +52,8 @@ defmodule Holler.Services.Pushbullet do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     title = Map.get(params, :title, config.title)
 
     payload =
@@ -62,7 +64,7 @@ defmodule Holler.Services.Pushbullet do
       }
       |> apply_target(config.target)
 
-    case Req.post(@api_url,
+    case Holler.HTTP.post(@api_url,
            json: payload,
            headers: [{"access-token", config.token}]
          ) do

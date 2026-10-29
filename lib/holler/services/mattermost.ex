@@ -45,6 +45,8 @@ defmodule Holler.Services.Mattermost do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     username = Map.get(params, :username, config.username)
     channel = Map.get(params, :channel, config.channel)
     icon = Map.get(params, :icon, config.icon)
@@ -57,7 +59,7 @@ defmodule Holler.Services.Mattermost do
       |> maybe_put("channel", channel)
       |> put_icon(icon)
 
-    case Req.post(url, json: payload) do
+    case Holler.HTTP.post(url, json: payload) do
       {:ok, %{status: 200}} ->
         :ok
 

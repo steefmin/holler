@@ -69,6 +69,8 @@ defmodule Holler.Services.OpsGenie do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     title = Map.get(params, :title, config.title)
 
     port_suffix = if config.port == @default_port, do: "", else: ":#{config.port}"
@@ -99,7 +101,7 @@ defmodule Holler.Services.OpsGenie do
       |> put_optional("user", override(params, :user, config.user))
       |> put_optional("note", override(params, :note, config.note))
 
-    case Req.post(url,
+    case Holler.HTTP.post(url,
            json: payload,
            headers: [{"authorization", "GenieKey #{config.api_key}"}]
          ) do

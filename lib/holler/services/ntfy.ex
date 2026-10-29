@@ -31,6 +31,8 @@ defmodule Holler.Services.Ntfy do
   | `firebase` | `yes`       | Forward to Firebase |
   | `scheme`   | `https`     | `http` or `https` |
 
+  `title` and `click` in `params` override the matching options per message.
+
   ## Examples
 
       ntfy://ntfy.sh/my-topic
@@ -81,7 +83,8 @@ defmodule Holler.Services.Ntfy do
   @impl true
   def send(config, message, params) do
     title = Map.get(params, :title, config.title)
-    config = %{config | title: title}
+    click = Map.get(params, :click, config.click)
+    config = %{config | title: title, click: click}
 
     url = build_url(config)
     headers = build_headers(config)
@@ -93,7 +96,7 @@ defmodule Holler.Services.Ntfy do
         [body: message, headers: headers]
       end
 
-    case Req.post(url, opts) do
+    case Holler.HTTP.post(url, opts) do
       {:ok, %{status: status}} when status in 200..299 ->
         :ok
 

@@ -10,7 +10,7 @@ Add `holler` to your dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:holler, "~> 0.2"}
+    {:holler, "~> 0.3"}
   ]
 end
 ```
@@ -48,6 +48,21 @@ Holler.send(
 )
 ```
 
+### Click URL per message
+
+Pass `click` to open a URL when the notification is tapped or clicked:
+
+```elixir
+Holler.send(
+  "gotify://example.com/AqEtoken123456",
+  "Your morning overview is ready",
+  %{title: "Agents", click: "https://example.com/conversations/42"}
+)
+```
+
+ntfy sends it as the `Click` header, Gotify as the `client::notification` extras
+and Bark as `url`. Every other service gets the URL as the last line of the message.
+
 ## Supported services
 
 | Service      | URL scheme      | Example URL |
@@ -82,8 +97,8 @@ Holler.send(
 ```
 
 Parses `url`, initialises the matching service, and sends `message` in one step.
-`params` is merged into the config and can override per-call options like `title`
-or `priority`.
+`params` is merged into the config and can override per-call options like `title`,
+`priority` or `click`.
 
 ### `Holler.create_sender/1`
 

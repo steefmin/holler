@@ -37,11 +37,13 @@ defmodule Holler.Services.GoogleChat do
   end
 
   @impl true
-  def send(config, message, _params) do
+  def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     url = "https://#{config.host}#{config.path}?#{config.query_string}"
     payload = %{"text" => message}
 
-    case Req.post(url, json: payload) do
+    case Holler.HTTP.post(url, json: payload) do
       {:ok, %{status: status}} when status in 200..299 ->
         :ok
 

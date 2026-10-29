@@ -52,6 +52,8 @@ defmodule Holler.Services.IFTTT do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     title = Map.get(params, :title, config.title)
 
     values = %{
@@ -109,7 +111,7 @@ defmodule Holler.Services.IFTTT do
   defp send_event(webhook_id, event, values) do
     url = "#{@api_base}/#{URI.encode(event)}/with/key/#{webhook_id}"
 
-    case Req.post(url, json: values) do
+    case Holler.HTTP.post(url, json: values) do
       {:ok, %{status: 200}} ->
         :ok
 

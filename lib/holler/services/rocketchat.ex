@@ -39,6 +39,8 @@ defmodule Holler.Services.Rocketchat do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     username = Map.get(params, :username, config.username)
     channel = Map.get(params, :channel, config.channel)
 
@@ -49,7 +51,7 @@ defmodule Holler.Services.Rocketchat do
       |> maybe_put("username", username)
       |> maybe_put("channel", channel)
 
-    case Req.post(url, json: payload) do
+    case Holler.HTTP.post(url, json: payload) do
       {:ok, %{status: status}} when status in 200..299 ->
         :ok
 

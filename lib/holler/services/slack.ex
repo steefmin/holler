@@ -70,6 +70,8 @@ defmodule Holler.Services.Slack do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     config = merge_params(config, params)
     payload = build_payload(config, message)
 
@@ -201,7 +203,7 @@ defmodule Holler.Services.Slack do
   defp send_webhook(config, payload) do
     url = webhook_url(config.token)
 
-    case Req.post(url, json: payload) do
+    case Holler.HTTP.post(url, json: payload) do
       {:ok, %{status: 200, body: "ok"}} ->
         :ok
 
@@ -222,7 +224,7 @@ defmodule Holler.Services.Slack do
   defp send_api(config, payload) do
     auth = authorization(config.token)
 
-    case Req.post(@api_url, json: payload, headers: [{"authorization", auth}]) do
+    case Holler.HTTP.post(@api_url, json: payload, headers: [{"authorization", auth}]) do
       {:ok, %{status: 200, body: %{"ok" => true}}} ->
         :ok
 

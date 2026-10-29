@@ -52,6 +52,8 @@ defmodule Holler.Services.Pushover do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     title = Map.get(params, :title, config.title)
     priority = Map.get(params, :priority, config.priority)
     devices = Map.get(params, :devices, config.devices)
@@ -96,7 +98,7 @@ defmodule Holler.Services.Pushover do
       |> maybe_put("title", title)
       |> maybe_put("device", device)
 
-    case Req.post(@api_url, json: payload) do
+    case Holler.HTTP.post(@api_url, json: payload) do
       {:ok, %{status: 200, body: %{"status" => 1}}} ->
         :ok
 

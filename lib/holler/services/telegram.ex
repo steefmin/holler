@@ -59,6 +59,8 @@ defmodule Holler.Services.Telegram do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     if String.length(message) > @max_length do
       {:error, :message_too_long}
     else
@@ -127,7 +129,7 @@ defmodule Holler.Services.Telegram do
       }
       |> maybe_put_parse_mode(parse_mode)
 
-    case Req.post(url, json: payload) do
+    case Holler.HTTP.post(url, json: payload) do
       {:ok, %{status: 200, body: %{"ok" => true}}} ->
         :ok
 

@@ -44,6 +44,8 @@ defmodule Holler.Services.Join do
 
   @impl true
   def send(config, message, params) do
+    message = Holler.Click.append(message, params)
+
     title = Map.get(params, :title, config.title)
     icon = Map.get(params, :icon, config.icon)
 
@@ -56,7 +58,7 @@ defmodule Holler.Services.Join do
       |> maybe_param(:title, title)
       |> maybe_param(:icon, icon)
 
-    case Req.get(@api_base, params: query_params) do
+    case Holler.HTTP.get(@api_base, params: query_params) do
       {:ok, %{status: 200, body: %{"success" => true}}} ->
         :ok
 
